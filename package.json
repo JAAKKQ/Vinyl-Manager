@@ -1,0 +1,25 @@
+{
+  "name": "myvinyldb",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JAAKKQ/myVinylDB.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JAAKKQ/myVinylDB/issues"
+  },
+  "homepage": "https://github.com/JAAKKQ/myVinylDB#readme",
+  "dependencies": {
+    "node-fetch": "^3.3.0",
+    "serialport": "^10.5.0",
+    "ws": "^8.11.0"
+  }
+}
