@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { createInterface } from 'readline';
-import fs from 'fs';
+import fs, { read } from 'fs';
 
 const config = JSON.parse(fs.readFileSync('config.json'));
 
@@ -38,19 +38,17 @@ function search() {
     readline.prompt();
     readline.on('line', name => {
         // Fetch and display the vinyl record information
-        if (name === "list") {
-            fs.readFile('records.json', (err, data) => {
-                if (err) throw err;
-                const records = JSON.parse(data);
-                records.forEach(record => {
-                    console.log('--------------------------------------------------');
-                    console.log(`Barcode: ${record.name}`);
-                    console.log(`Title: ${record.result.title}`);
-                    console.log(`Country: ${record.result.country}`);
-                    console.log(`Year: ${record.result.year}`);
-                    console.log(`Genre: ${record.result.genre}`);
-                    console.log(`Style: ${record.result.style}`);
-                });
+        if (name === "/list") {
+            console.log(listRecords(function () { readline.prompt(); }));
+        } else if (name.includes("/find")) {
+            const query = name.split(' ').slice(1).join(' ');
+            searchRecords(query, function () {
+                readline.prompt();
+            });
+        } else if (name.includes("/delete")) {
+            const query = name.split(' ').slice(1).join(' ');
+            deleteRecord(query, function () {
+                readline.prompt();
             });
         } else {
             getVinylInfo(name).then(info => {
@@ -58,6 +56,83 @@ function search() {
                     readline.prompt();
                 });
             });
+        }
+    });
+}
+
+function searchRecords(query, cb) {
+    fs.readFile('records.json', (err, data) => {
+        if (err) throw err;
+        const records = JSON.parse(data);
+        const results = records.filter(record => {
+            return record.name.toLowerCase().includes(query.toLowerCase()) ||
+                record.result.title.toLowerCase().includes(query.toLowerCase()) ||
+                record.result.country.toLowerCase().includes(query.toLowerCase()) ||
+                record.result.year.toString().includes(query) ||
+                record.result.label.some(label => label.toLowerCase().includes(query.toLowerCase())) ||
+                record.result.genre.some(genre => genre.toLowerCase().includes(query.toLowerCase())) ||
+                record.result.style.some(style => style.toLowerCase().includes(query.toLowerCase()));
+        });
+        console.log(`Results for query "${query}":`);
+        console.log("----------------------------------------");
+        for (let i = 0; i < records.length; i++) {
+            const record = records[i];
+            console.log("----------------------------------------");
+            console.log(record.result.title)
+            if (i == records.length - 1) {
+                cb();
+            }
+        }
+    });
+}
+
+function listRecords(cb) {
+    fs.readFile('records.json', (err, data) => {
+        if (err) throw err;
+        const records = JSON.parse(data);
+        for (let i = 0; i < records.length; i++) {
+            const record = records[i];
+            console.log('--------------------------------------------------');
+            console.log(`Barcode: ${record.name}`);
+            console.log(`Title: ${record.result.title}`);
+            console.log(`Country: ${record.result.country}`);
+            console.log(`Year: ${record.result.year}`);
+            console.log(`Genre: ${record.result.genre}`);
+            console.log(`Style: ${record.result.style}`);
+            if (i == records.length - 1) {
+                cb();
+            }
+        }
+    });
+}
+
+
+function deleteRecord(name, cb) {
+    fs.readFile('records.json', (err, data) => {
+        if (err) throw err;
+        const records = JSON.parse(data);
+        const recordToDelete = records.find(record => record.name === name);
+        if (recordToDelete) {
+            console.log(`Are you sure you want to delete the record with barcode "${name}"? (y/n)`);
+            process.stdin.once('data', data => {
+                readline.clearLine(process.stdout, 0);
+                const input = data.toString().trim().toLowerCase();
+                if (input === 'y' || input === 'yes') {
+                    // Remove the record from the array
+                    const updatedRecords = records.filter(record => record.name !== name);
+                    fs.writeFile('records.json', JSON.stringify(updatedRecords), (err) => {
+                        if (err) throw err;
+                        console.log('Record deleted from records.json');
+                        cb();
+                    });
+                } else {
+                    console.log('Record not deleted');
+                    cb();
+                }
+            });
+        } else {
+            console.log(`Record with barcode "${name}" not found in records.json`);
+            cb();
         }
     });
 }
