@@ -66,13 +66,13 @@ function searchRecords(query, cb) {
         if (err) throw err;
         const records = JSON.parse(data);
         const results = records.filter(record => {
-            return record.name.toLowerCase().includes(query.toLowerCase()) ||
-                record.result.title.toLowerCase().includes(query.toLowerCase()) ||
-                record.result.country.toLowerCase().includes(query.toLowerCase()) ||
-                record.result.year.toString().includes(query) ||
-                record.result.label.some(label => label.toLowerCase().includes(query.toLowerCase())) ||
-                record.result.genre.some(genre => genre.toLowerCase().includes(query.toLowerCase())) ||
-                record.result.style.some(style => style.toLowerCase().includes(query.toLowerCase()));
+            return (record.name && record.name.toLowerCase().includes(query.toLowerCase())) ||
+                (record.result.title && record.result.title.toLowerCase().includes(query.toLowerCase())) ||
+                (record.result.country && record.result.country.toLowerCase().includes(query.toLowerCase())) ||
+                (record.result.year && record.result.year.toString().includes(query)) ||
+                (record.result.label && record.result.label.some(label => label.toLowerCase().includes(query.toLowerCase()))) ||
+                (record.result.genre && record.result.genre.some(genre => genre.toLowerCase().includes(query.toLowerCase()))) ||
+                (record.result.style && record.result.style.some(style => style.toLowerCase().includes(query.toLowerCase())));
         });
         console.log(results.length + ` result(s) for query "${query}":`);
         for (let i = 0; i < results.length; i++) {
@@ -96,6 +96,7 @@ function searchRecords(query, cb) {
         }
     });
 }
+
 
 function listRecords(cb) {
     fs.readFile(config.path, (err, data) => {
