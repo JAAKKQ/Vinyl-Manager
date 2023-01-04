@@ -177,7 +177,95 @@ function prosess(info, cb) {
                     if (input === 'y' || input === 'yes') {
                         readline.question('Enter the title: ', title => {
                             readline.question('Enter the price: ', price => {
-                                const customRecord = { name: info.name, title, price };
+                                const customRecord = {
+                                    "name": info.name,
+                                    "result": {
+                                        "country": "Europe",
+                                        "year": "2017",
+                                        "format": [
+                                            "Vinyl",
+                                            "LP",
+                                            "Compilation"
+                                        ],
+                                        "label": [
+                                            "Shady Records",
+                                            "Aftermath Entertainment",
+                                            "Interscope Records",
+                                            "Universal International Music B.V."
+                                        ],
+                                        "type": "release",
+                                        "genre": [
+                                            "Hip Hop"
+                                        ],
+                                        "style": [],
+                                        "id": 10354932,
+                                        "barcode": [
+                                            "602557383362",
+                                            "6 02557 38336 2"
+                                        ],
+                                        "user_data": {
+                                            "in_wantlist": false,
+                                            "in_collection": false
+                                        },
+                                        "master_id": 1160826,
+                                        "master_url": "https://api.discogs.com/masters/1160826",
+                                        "uri": "/release/10354932-50-Cent-Best-Of",
+                                        "catno": "602557383362",
+                                        "title": title,
+                                        "thumb": "https://i.discogs.com/S2Tp7kfsEIkhb1CJUgs_eCcnDC_3lxNNfvEFeSQFEpQ/rs:fit/g:sm/q:40/h:150/w:150/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTEwMzU0/OTMyLTE2NDAzNzYx/NzctODEwNi5qcGVn.jpeg",
+                                        "cover_image": "https://i.discogs.com/LJeD5iQ5tYX0vDK_Znp02SZZXAPMGmB2M8Z0zgIDO78/rs:fit/g:sm/q:90/h:600/w:600/czM6Ly9kaXNjb2dz/LWRhdGFiYXNlLWlt/YWdlcy9SLTEwMzU0/OTMyLTE2NDAzNzYx/NzctODEwNi5qcGVn.jpeg",
+                                        "resource_url": "https://api.discogs.com/releases/10354932",
+                                        "community": {
+                                            "want": 183,
+                                            "have": 1412
+                                        },
+                                        "format_quantity": 2,
+                                        "formats": [
+                                            {
+                                                "name": "Vinyl",
+                                                "qty": "2",
+                                                "descriptions": [
+                                                    "LP",
+                                                    "Compilation"
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "price": {
+                                        "Mint (M)": {
+                                            "currency": "EUR",
+                                            "value": price
+                                        },
+                                        "Near Mint (NM or M-)": {
+                                            "currency": "EUR",
+                                            "value": price
+                                        },
+                                        "Very Good Plus (VG+)": {
+                                            "currency": "EUR",
+                                            "value": price
+                                        },
+                                        "Very Good (VG)": {
+                                            "currency": "EUR",
+                                            "value": price
+                                        },
+                                        "Good Plus (G+)": {
+                                            "currency": "EUR",
+                                            "value": price
+                                        },
+                                        "Good (G)": {
+                                            "currency": "EUR",
+                                            "value": price
+                                        },
+                                        "Fair (F)": {
+                                            "currency": "EUR",
+                                            "value": price
+                                        },
+                                        "Poor (P)": {
+                                            "currency": "EUR",
+                                            "value": price
+                                        }
+                                    }
+                                };
                                 records.push(customRecord);
                                 fs.writeFile(config.path, JSON.stringify(records), (err) => {
                                     if (err) throw err;
