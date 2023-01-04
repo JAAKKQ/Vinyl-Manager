@@ -6,21 +6,6 @@ const rootFolder = dirname(import.meta.url);
 
 const config = JSON.parse(fs.readFileSync('config.json'));
 
-const authOptions = {
-    method: 'POST',
-    headers: {
-        'Authorization': 'Basic ' + Buffer.from(config.key + ':' + config.secret).toString('base64'),
-    },
-    url: 'https://api.discogs.com/oauth/request_token',
-};
-
-fetch(authOptions.url, authOptions)
-    .then(response => response.text())
-    .then((body) => {
-        const requestToken = body.split('&')[0].split('=')[1];
-        console.log(requestToken);
-    });
-
 const readline = createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -28,7 +13,7 @@ const readline = createInterface({
 });
 
 async function getVinylInfo(name) {
-    const url = `https://api.discogs.com/database/search?query=${name}&format=Vinyl&key=${config.key}&secret=${config.secret}`;
+    const url = `https://api.discogs.com/database/search?query=${name}&format=Vinyl&token=${config.token}`;
     const response = await fetch(url);
     const data = await response.json();
     if (data.results.length === 0) {
@@ -37,8 +22,7 @@ async function getVinylInfo(name) {
         };
     } else {
         const releaseId = data.results[0].id;
-        const releaseUrl = `https://api.discogs.com/marketplace/price_suggestions/${releaseId}?key=${config.key}&secret=${config.secret}`;
-
+        const releaseUrl = `https://api.discogs.com/marketplace/price_suggestions/${releaseId}?token=${config.token}`;
         const releaseResponse = await fetch(releaseUrl);
         const releaseData = await releaseResponse.json();
         return {
@@ -101,6 +85,11 @@ function searchRecords(query, cb) {
             console.log(`Genre: ${record.result.genre}`);
             console.log(`Style: ${record.result.style}`);
             console.log(`Format: ${record.result.format}`);
+            console.log("PRICES:");
+            Object.entries(record.price).forEach(([key, value]) => {
+                const price = `${key}: ${value.value} ${value.currency}`;
+                console.log(price);
+            });
             if (i == results.length - 1) {
                 cb();
             }
@@ -122,6 +111,11 @@ function listRecords(cb) {
             console.log(`Genre: ${record.result.genre}`);
             console.log(`Style: ${record.result.style}`);
             console.log(`Format: ${record.result.format}`);
+            console.log("PRICES:");
+            Object.entries(record.price).forEach(([key, value]) => {
+                const price = `${key}: ${value.value} ${value.currency}`;
+                console.log(price);
+            });
             if (i == records.length - 1) {
                 cb();
             }
@@ -206,7 +200,11 @@ function prosess(info, cb) {
         console.log(`Genre: ${info.result.genre}`);
         console.log(`Style: ${info.result.style}`);
         console.log(`Format: ${info.result.format}`);
-        console.log(info.price);
+        console.log("PRICES:");
+        Object.entries(info.price).forEach(([key, value]) => {
+            const price = `${key}: ${value.value} ${value.currency}`;
+            console.log(price);
+        });
         fs.readFile(config.path, (err, data) => {
             let records;
             try {
@@ -242,8 +240,5 @@ function prosess(info, cb) {
         });
     }
 }
-
-
-
 
 search();
