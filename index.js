@@ -68,18 +68,18 @@ function sortGenre(cb) {
         if (err) throw err;
         const records = JSON.parse(data);
         records.sort(function (a, b) {
-            if (a.result.genre < b.result.genre) {
+            if (a.result.genre[0] < b.result.genre[0]) {
                 return -1;
             }
-            if (a.result.genre > b.result.genre) {
+            if (a.result.genre[0] > b.result.genre[0]) {
                 return 1;
             }
             return 0;
         });
-        let genreCount = new Set(records.map(record => record.result.genre)).size;
+        let genreCount = new Set(records.map(record => record.result.genre[0])).size;
         // Print the sorted records
         records.forEach(function (record, i) {
-            console.log(record.result.title + ': ' + record.result.genre);
+            console.log(record.result.title + ': ' + record.result.genre[0]);
             if (i == records.length - 1) {
                 console.log("Sorted " + records.length + " records to " + genreCount + " differend genres.")
                 cb();
