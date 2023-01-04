@@ -129,6 +129,7 @@ function listRecords(cb) {
     fs.readFile(config.path, (err, data) => {
         if (err) throw err;
         const records = JSON.parse(data);
+        const totalPrices = getTotalPrices(records);
         for (let i = 0; i < records.length; i++) {
             const record = records[i];
             console.log('--------------------------------------------------');
@@ -145,12 +146,18 @@ function listRecords(cb) {
                 console.log(price);
             });
             if (i == records.length - 1) {
-                console.log("Listed " + records.length + " records.")
+                console.log(`Listed ${records.length} records.`);
+                console.log('\x1b[31m%s\x1b[0m', '-------------------------Total prices-------------------------');
+                for (const condition in totalPrices) {
+                    console.log('\x1b[31m%s\x1b[0m', `${condition}: ${totalPrices[condition]}`);
+                }
+                console.log('\x1b[31m%s\x1b[0m', '--------------------------------------------------------------');
                 cb();
             }
         }
     });
 }
+
 
 
 function deleteRecord(name, cb) {
@@ -182,6 +189,25 @@ function deleteRecord(name, cb) {
         }
     });
 }
+
+function getTotalPrices(records) {
+    // Initialize an object to store the total prices for each condition
+    const totalPrices = {};
+
+    // Iterate over the records and add the price of each record to the total price for each condition
+    records.forEach(function (record) {
+        for (const condition in record.price) {
+            if (!totalPrices[condition]) {
+                totalPrices[condition] = 0;
+            }
+            totalPrices[condition] += record.price[condition].value;
+        }
+    });
+
+    return totalPrices;
+}
+
+
 
 function prosess(info, cb) {
     console.log("------------------ " + info.name + " ------------------")
