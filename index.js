@@ -45,7 +45,9 @@ function search() {
                 readline.prompt();
             });
         } else if (name.includes("/sort")) {
-            console.log(sortGenre());
+            sortGenre(function () {
+                readline.prompt();
+            });
         } else if (name.includes("/delete")) {
             const query = name.split(' ').slice(1).join(' ');
             deleteRecord(query, function () {
@@ -61,7 +63,7 @@ function search() {
     });
 }
 
-function sortGenre() {
+function sortGenre(cb) {
     fs.readFile(config.path, (err, data) => {
         if (err) throw err;
         const records = JSON.parse(data);
@@ -74,7 +76,15 @@ function sortGenre() {
             }
             return 0;
         });
-        return records;
+
+        // Print the sorted records
+        records.forEach(function (record, i) {
+            console.log(record.result.title + ': ' + record.result.genre);
+            if (i == records.length - 1) {
+                console.log("Sorted " + records.length + " records.")
+                cb();
+            }
+        });
     });
 }
 
