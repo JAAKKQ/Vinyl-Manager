@@ -76,12 +76,12 @@ function sortGenre(cb) {
             }
             return 0;
         });
-
+        let genreCount = new Set(records.map(record => record.result.genre)).size;
         // Print the sorted records
         records.forEach(function (record, i) {
             console.log(record.result.title + ': ' + record.result.genre);
             if (i == records.length - 1) {
-                console.log("Sorted " + records.length + " records.")
+                console.log("Sorted " + records.length + " records to " + genreCount + " differend genres.")
                 cb();
             }
         });
