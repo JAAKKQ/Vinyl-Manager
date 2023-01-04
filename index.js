@@ -118,6 +118,7 @@ function listRecords(cb) {
                 console.log(price);
             });
             if (i == records.length - 1) {
+                console.log("Listed " + records.length + " records.")
                 cb();
             }
         }
