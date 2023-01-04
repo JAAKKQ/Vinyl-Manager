@@ -1,8 +1,25 @@
 import fetch from 'node-fetch';
 import { createInterface } from 'readline';
 import fs, { read } from 'fs';
+import { dirname } from 'path';
+const rootFolder = dirname(import.meta.url);
 
 const config = JSON.parse(fs.readFileSync('config.json'));
+
+const authOptions = {
+    method: 'POST',
+    headers: {
+        'Authorization': 'Basic ' + Buffer.from(config.key + ':' + config.secret).toString('base64'),
+    },
+    url: 'https://api.discogs.com/oauth/request_token',
+};
+
+fetch(authOptions.url, authOptions)
+    .then(response => response.text())
+    .then((body) => {
+        const requestToken = body.split('&')[0].split('=')[1];
+        console.log(requestToken);
+    });
 
 const readline = createInterface({
     input: process.stdin,
@@ -61,7 +78,7 @@ function search() {
 }
 
 function searchRecords(query, cb) {
-    fs.readFile('records.json', (err, data) => {
+    fs.readFile(config.path, (err, data) => {
         if (err) throw err;
         const records = JSON.parse(data);
         const results = records.filter(record => {
@@ -73,13 +90,18 @@ function searchRecords(query, cb) {
                 record.result.genre.some(genre => genre.toLowerCase().includes(query.toLowerCase())) ||
                 record.result.style.some(style => style.toLowerCase().includes(query.toLowerCase()));
         });
-        console.log(`Results for query "${query}":`);
-        console.log("----------------------------------------");
-        for (let i = 0; i < records.length; i++) {
-            const record = records[i];
+        console.log(results.length + ` result(s) for query "${query}":`);
+        for (let i = 0; i < results.length; i++) {
+            const record = results[i];
             console.log("----------------------------------------");
-            console.log(record.result.title)
-            if (i == records.length - 1) {
+            console.log(`Barcode: ${record.name}`);
+            console.log(`Title: ${record.result.title}`);
+            console.log(`Country: ${record.result.country}`);
+            console.log(`Year: ${record.result.year}`);
+            console.log(`Genre: ${record.result.genre}`);
+            console.log(`Style: ${record.result.style}`);
+            console.log(`Format: ${record.result.format}`);
+            if (i == results.length - 1) {
                 cb();
             }
         }
@@ -87,7 +109,7 @@ function searchRecords(query, cb) {
 }
 
 function listRecords(cb) {
-    fs.readFile('records.json', (err, data) => {
+    fs.readFile(config.path, (err, data) => {
         if (err) throw err;
         const records = JSON.parse(data);
         for (let i = 0; i < records.length; i++) {
@@ -99,6 +121,7 @@ function listRecords(cb) {
             console.log(`Year: ${record.result.year}`);
             console.log(`Genre: ${record.result.genre}`);
             console.log(`Style: ${record.result.style}`);
+            console.log(`Format: ${record.result.format}`);
             if (i == records.length - 1) {
                 cb();
             }
@@ -108,7 +131,7 @@ function listRecords(cb) {
 
 
 function deleteRecord(name, cb) {
-    fs.readFile('records.json', (err, data) => {
+    fs.readFile(config.path, (err, data) => {
         if (err) throw err;
         const records = JSON.parse(data);
         const recordToDelete = records.find(record => record.name === name);
@@ -120,7 +143,7 @@ function deleteRecord(name, cb) {
                 if (input === 'y' || input === 'yes') {
                     // Remove the record from the array
                     const updatedRecords = records.filter(record => record.name !== name);
-                    fs.writeFile('records.json', JSON.stringify(updatedRecords), (err) => {
+                    fs.writeFile(config.path, JSON.stringify(updatedRecords), (err) => {
                         if (err) throw err;
                         console.log('Record deleted from records.json');
                         cb();
@@ -140,7 +163,7 @@ function deleteRecord(name, cb) {
 function prosess(info, cb) {
     console.log("------------------ " + info.name + " ------------------")
     if (info.result === undefined) {
-        fs.readFile('records.json', (err, data) => {
+        fs.readFile(config.path, (err, data) => {
             let records;
             try {
                 records = JSON.parse(data);
@@ -162,7 +185,7 @@ function prosess(info, cb) {
                             readline.question('Enter the price: ', price => {
                                 const customRecord = { name: info.name, title, price };
                                 records.push(customRecord);
-                                fs.writeFile('records.json', JSON.stringify(records), (err) => {
+                                fs.writeFile(config.path, JSON.stringify(records), (err) => {
                                     if (err) throw err;
                                     console.log('Custom record saved to records.json');
                                     cb();
@@ -177,9 +200,14 @@ function prosess(info, cb) {
             }
         });
     } else {
-        console.log(info.result.title);
+        console.log(`Title: ${info.result.title}`);
+        console.log(`Country: ${info.result.country}`);
+        console.log(`Year: ${info.result.year}`);
+        console.log(`Genre: ${info.result.genre}`);
+        console.log(`Style: ${info.result.style}`);
+        console.log(`Format: ${info.result.format}`);
         console.log(info.price);
-        fs.readFile('records.json', (err, data) => {
+        fs.readFile(config.path, (err, data) => {
             let records;
             try {
                 records = JSON.parse(data);
@@ -200,7 +228,7 @@ function prosess(info, cb) {
                     if (input === 'y' || input === 'yes') {
                         // Add the record to the array
                         records.push(info);
-                        fs.writeFile('records.json', JSON.stringify(records), (err) => {
+                        fs.writeFile(config.path, JSON.stringify(records), (err) => {
                             if (err) throw err;
                             console.log('Record saved to records.json');
                             cb();
