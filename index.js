@@ -1,8 +1,6 @@
 import fetch from 'node-fetch';
 import { createInterface } from 'readline';
 import fs, { read } from 'fs';
-import { dirname } from 'path';
-const rootFolder = dirname(import.meta.url);
 
 const config = JSON.parse(fs.readFileSync('config.json'));
 
@@ -46,6 +44,8 @@ function search() {
             searchRecords(query, function () {
                 readline.prompt();
             });
+        } else if (name.includes("/sort")) {
+            console.log(sortGenre());
         } else if (name.includes("/delete")) {
             const query = name.split(' ').slice(1).join(' ');
             deleteRecord(query, function () {
@@ -58,6 +58,23 @@ function search() {
                 });
             });
         }
+    });
+}
+
+function sortGenre() {
+    fs.readFile(config.path, (err, data) => {
+        if (err) throw err;
+        const records = JSON.parse(data);
+        records.sort(function (a, b) {
+            if (a.result.genre < b.result.genre) {
+                return -1;
+            }
+            if (a.result.genre > b.result.genre) {
+                return 1;
+            }
+            return 0;
+        });
+        return records;
     });
 }
 
