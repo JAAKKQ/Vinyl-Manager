@@ -10,17 +10,15 @@ const readline = createInterface({
     prompt: 'Scan barcode or enter name manually:\n'
 });
 
-const RATE_LIMIT = 60000 / 20; // 40 requests per minute
 let lastRequestTime = 0;
 
 async function rateLimitedFetch(url) {
-    const delay = Math.max(RATE_LIMIT - (Date.now() - lastRequestTime), 0);
-    await new Promise((resolve) => setTimeout(resolve, delay));
-    lastRequestTime = Date.now();
+    lastRequestTime += 1.1;
+    await new Promise((resolve) => setTimeout(resolve, lastRequestTime * 1000));
     const response = await fetch(url);
+    console.log(response.headers.get("X-Discogs-Ratelimit-Remaining"));
     return response;
 }
-
 
 async function getVinylInfo(name) {
     const url = `https://api.discogs.com/database/search?query=${name}&format=Vinyl&token=${config.token}`;
@@ -32,7 +30,7 @@ async function getVinylInfo(name) {
         };
     } else {
         const releaseId = data.results[0].id;
-        const releaseUrl = `https://api.discogs.com/releases/${releaseId}?token=${config.token}`;
+        const releaseUrl = `https://api.discogs.com/releases/${releaseId}&format=Vinyl?token=${config.token}`;
         const releaseResponse = await rateLimitedFetch(releaseUrl);
         const releaseData = await releaseResponse.json();
         const priceUrl = `https://api.discogs.com/marketplace/price_suggestions/${releaseId}?token=${config.token}`;
@@ -257,17 +255,14 @@ function prosess(info, cb) {
                                     "name": info.name,
                                     "result": {
                                         "country": "Custom Record",
-                                        "year": "2017",
+                                        "year": "0000",
                                         "format": [
                                             "Vinyl",
                                             "LP",
                                             "Compilation"
                                         ],
                                         "label": [
-                                            "Shady Records",
-                                            "Aftermath Entertainment",
-                                            "Interscope Records",
-                                            "Universal International Music B.V."
+                                            "Custom"
                                         ],
                                         "type": "release",
                                         "genre": [
@@ -412,15 +407,13 @@ async function addSongsToData() {
         const releaseUrl = `https://api.discogs.com/releases/${releaseId}?token=${config.token}`;
         const releaseResponse = await rateLimitedFetch(releaseUrl);
         const releaseData = await releaseResponse.json();
-        console.log(releaseData)
         console.log("Prosessing: " + release.result.title);
         return {
             ...release,
-            songs: releaseData,
+            songs: releaseData.tracklist,
         };
     });
     const updatedData = await Promise.all(modifiedData);
-    console.log(updatedData);
     console.log("Writting new data...")
     fs.writeFile(config.path, JSON.stringify(updatedData), (err) => {
         if (err) throw err;
