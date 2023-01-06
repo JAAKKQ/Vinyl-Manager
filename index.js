@@ -10,7 +10,7 @@ const readline = createInterface({
     prompt: 'Scan barcode or enter name manually:\n'
 });
 
-const RATE_LIMIT = 1000 / 40; // 40 requests per second
+const RATE_LIMIT = 60000 / 20; // 40 requests per minute
 let lastRequestTime = 0;
 
 async function rateLimitedFetch(url) {
@@ -408,14 +408,15 @@ function prosess(info, cb) {
 async function addSongsToData() {
     const data = JSON.parse(fs.readFileSync(config.path));
     const modifiedData = data.map(async (release) => {
-        const releaseId = release.id;
+        const releaseId = release.result.id;
         const releaseUrl = `https://api.discogs.com/releases/${releaseId}?token=${config.token}`;
         const releaseResponse = await rateLimitedFetch(releaseUrl);
         const releaseData = await releaseResponse.json();
+        console.log(releaseData)
         console.log("Prosessing: " + release.result.title);
         return {
             ...release,
-            songs: releaseData.tracklist,
+            songs: releaseData,
         };
     });
     const updatedData = await Promise.all(modifiedData);
