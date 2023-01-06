@@ -10,9 +10,21 @@ const readline = createInterface({
     prompt: 'Scan barcode or enter name manually:\n'
 });
 
+const RATE_LIMIT = 1000 / 40; // 40 requests per second
+let lastRequestTime = 0;
+
+async function rateLimitedFetch(url) {
+    const delay = Math.max(RATE_LIMIT - (Date.now() - lastRequestTime), 0);
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    lastRequestTime = Date.now();
+    const response = await fetch(url);
+    return response;
+}
+
+
 async function getVinylInfo(name) {
     const url = `https://api.discogs.com/database/search?query=${name}&format=Vinyl&token=${config.token}`;
-    const response = await fetch(url);
+    const response = await rateLimitedFetch(url);
     const data = await response.json();
     if (data.results.length === 0) {
         return {
@@ -20,16 +32,21 @@ async function getVinylInfo(name) {
         };
     } else {
         const releaseId = data.results[0].id;
-        const releaseUrl = `https://api.discogs.com/marketplace/price_suggestions/${releaseId}?token=${config.token}`;
-        const releaseResponse = await fetch(releaseUrl);
+        const releaseUrl = `https://api.discogs.com/releases/${releaseId}?token=${config.token}`;
+        const releaseResponse = await rateLimitedFetch(releaseUrl);
         const releaseData = await releaseResponse.json();
+        const priceUrl = `https://api.discogs.com/marketplace/price_suggestions/${releaseId}?token=${config.token}`;
+        const priceResponse = await rateLimitedFetch(priceUrl);
+        const priceData = await priceResponse.json();
         return {
             name: name,
             result: data.results[0],
-            price: releaseData
+            songs: releaseData.tracklist,
+            price: priceData,
         };
-    };
+    }
 }
+
 
 
 function search() {
@@ -53,6 +70,10 @@ function search() {
             deleteRecord(query, function () {
                 readline.prompt();
             });
+        } else if (name.includes("/update")) {
+            addSongsToData();
+        } else if (name == "") {
+            readline.prompt();
         } else {
             getVinylInfo(name).then(info => {
                 prosess(info, function () {
@@ -235,7 +256,7 @@ function prosess(info, cb) {
                                 const customRecord = {
                                     "name": info.name,
                                     "result": {
-                                        "country": "Europe",
+                                        "country": "Custom Record",
                                         "year": "2017",
                                         "format": [
                                             "Vinyl",
@@ -250,7 +271,7 @@ function prosess(info, cb) {
                                         ],
                                         "type": "release",
                                         "genre": [
-                                            "Hip Hop"
+                                            "Custom"
                                         ],
                                         "style": [],
                                         "id": 10354932,
@@ -382,6 +403,24 @@ function prosess(info, cb) {
             }
         });
     }
+}
+
+async function addSongsToData() {
+    const data = JSON.parse(fs.readFileSync(config.path));
+    const modifiedData = data.map(async (release) => {
+        const releaseId = release.id;
+        const releaseUrl = `https://api.discogs.com/releases/${releaseId}?token=${config.token}`;
+        const releaseResponse = await rateLimitedFetch(releaseUrl);
+        const releaseData = await releaseResponse.json();
+        console.log("Prosessing: " + release.result.title);
+        return {
+            ...release,
+            songs: releaseData.tracklist,
+        };
+    });
+    const updatedData = await Promise.all(modifiedData);
+    fs.writeFileSync(config.path, JSON.stringify(updatedData));
+    console.log("Added new songs!")
 }
 
 search();
