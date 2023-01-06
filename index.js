@@ -419,6 +419,7 @@ async function addSongsToData() {
         };
     });
     const updatedData = await Promise.all(modifiedData);
+    console.log(updatedData);
     console.log("Writting new data...")
     fs.writeFileSync(config.path, JSON.stringify(updatedData), (err) => {
         if (err) throw err;
