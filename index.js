@@ -16,7 +16,6 @@ async function rateLimitedFetch(url) {
     lastRequestTime += 1.1;
     await new Promise((resolve) => setTimeout(resolve, lastRequestTime * 1000));
     const response = await fetch(url);
-    console.log(response.headers.get("X-Discogs-Ratelimit-Remaining"));
     return response;
 }
 
