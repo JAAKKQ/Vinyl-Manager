@@ -16,7 +16,7 @@ To use the website template:
 1. Host the contents of the `www` folder on a web server
 2. Set the path in the `config.json` file in the root directory of the CLI program to the folder where you are hosting the website template.
 
-With the website template, you will have access to your collection at all times and can easily search your records from any device with an internet connection.
+With the website template, you will have access to your collection at all times and can easily search your records from any device with an internet connection. You can find mine at [r3ne.net/records](https://r3ne.net/records/).
 
 ## Getting Started
 
