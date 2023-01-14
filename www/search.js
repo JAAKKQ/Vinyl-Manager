@@ -1,30 +1,34 @@
-function searchRecords(query) {
-  fetch("../records.json")
-    .then((response) => response.json())
-    .then((records) => {
-      const results = records.filter((record) => {
-        return (
-          (record.name && record.name.toLowerCase().includes(query.toLowerCase())) ||
-          (record.result.title && record.result.title.toLowerCase().includes(query.toLowerCase())) ||
-          (record.result.country && record.result.country.toLowerCase().includes(query.toLowerCase())) ||
-          (record.result.year && record.result.year.toString().includes(query)) ||
-          (record.result.label &&
-            record.result.label.some((label) => label.toLowerCase().includes(query.toLowerCase()))) ||
-          (record.result.genre &&
-            record.result.genre.some((genre) => genre.toLowerCase().includes(query.toLowerCase()))) ||
-          (record.result.style &&
-            record.result.style.some((style) => style.toLowerCase().includes(query.toLowerCase()))) ||
-          (record.songs &&
-            record.songs.some((song) =>
-              song.title.toLowerCase().includes(query.toLowerCase())
-            ))
-        );
-      });
-      console.log(results);
-      displayResults(results);
-    });
-}
+let records = [];
 
+fetch("../records.json")
+  .then((response) => response.json())
+  .then((recordsobj) => {
+    records = recordsobj;
+    searchRecords("");
+  });
+
+function searchRecords(query) {
+  const results = records.filter((record) => {
+    return (
+      (record.name && record.name.toLowerCase().includes(query.toLowerCase())) ||
+      (record.result.title && record.result.title.toLowerCase().includes(query.toLowerCase())) ||
+      (record.result.country && record.result.country.toLowerCase().includes(query.toLowerCase())) ||
+      (record.result.year && record.result.year.toString().includes(query)) ||
+      (record.result.label &&
+        record.result.label.some((label) => label.toLowerCase().includes(query.toLowerCase()))) ||
+      (record.result.genre &&
+        record.result.genre.some((genre) => genre.toLowerCase().includes(query.toLowerCase()))) ||
+      (record.result.style &&
+        record.result.style.some((style) => style.toLowerCase().includes(query.toLowerCase()))) ||
+      (record.songs &&
+        record.songs.some((song) =>
+          song.title.toLowerCase().includes(query.toLowerCase())
+        ))
+    );
+  });
+  console.log(results);
+  displayResults(results);
+}
 
 function displayResults(results) {
   const resultsContainer = document.getElementById('results');
@@ -60,8 +64,6 @@ function displayResults(results) {
   });
 }
 
-
-
 const searchForm = document.getElementById('search-form');
 searchForm.addEventListener('submit', event => {
   event.preventDefault();
@@ -69,5 +71,3 @@ searchForm.addEventListener('submit', event => {
   const query = searchInput.value;
   searchRecords(query);
 });
-
-searchRecords("");
