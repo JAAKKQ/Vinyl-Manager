@@ -21,7 +21,7 @@ async function rateLimitedFetch(url) {
 
 async function getVinylInfo(name) {
     const url = `https://api.discogs.com/database/search?query=${name}&format=Vinyl&token=${config.token}`;
-    const response = await rateLimitedFetch(url);
+    const response = await fetch(url);
     const data = await response.json();
     if (data.results.length === 0) {
         return {
