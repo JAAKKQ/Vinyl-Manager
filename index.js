@@ -29,7 +29,7 @@ async function getVinylInfo(name) {
         };
     } else {
         const releaseId = data.results[0].id;
-        const releaseUrl = `https://api.discogs.com/releases/${releaseId}&format=Vinyl?token=${config.token}`;
+        const releaseUrl = `https://api.discogs.com/releases/${releaseId}?format=Vinyl&token=${config.token}`;
         const releaseResponse = await fetch(releaseUrl);
         const releaseData = await releaseResponse.json();
         const priceUrl = `https://api.discogs.com/marketplace/price_suggestions/${releaseId}?token=${config.token}`;
