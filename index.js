@@ -20,7 +20,7 @@ async function rateLimitedFetch(url) {
 }
 
 async function getVinylInfo(name) {
-    const url = `https://api.discogs.com/database/search?query=${name}&format=Vinyl&token=${config.token}`;
+    const url = `https://api.discogs.com/database/search?query=${name}&format=Vinyl&type=release&token=${config.token}`;
     const response = await fetch(url);
     const data = await response.json();
     if (data.results.length === 0) {
@@ -356,9 +356,14 @@ function prosess(info, cb) {
         console.log(`Genre: ${info.result.genre}`);
         console.log(`Style: ${info.result.style}`);
         console.log(`Format: ${info.result.format}`);
+        console.log("SONGS:");
+        Object.entries(info.songs).forEach(([key, value]) => {
+            const song = `  ${value.position}: ${value.title}`;
+            console.log(song);
+        });
         console.log("PRICES:");
         Object.entries(info.price).forEach(([key, value]) => {
-            const price = `${key}: ${value.value} ${value.currency}`;
+            const price = ` ${key}: ${value.value} ${value.currency}`;
             console.log(price);
         });
         fs.readFile(config.path, (err, data) => {
