@@ -30,10 +30,10 @@ async function getVinylInfo(name) {
     } else {
         const releaseId = data.results[0].id;
         const releaseUrl = `https://api.discogs.com/releases/${releaseId}&format=Vinyl?token=${config.token}`;
-        const releaseResponse = await rateLimitedFetch(releaseUrl);
+        const releaseResponse = await fetch(releaseUrl);
         const releaseData = await releaseResponse.json();
         const priceUrl = `https://api.discogs.com/marketplace/price_suggestions/${releaseId}?token=${config.token}`;
-        const priceResponse = await rateLimitedFetch(priceUrl);
+        const priceResponse = await fetch(priceUrl);
         const priceData = await priceResponse.json();
         return {
             name: name,
@@ -43,8 +43,6 @@ async function getVinylInfo(name) {
         };
     }
 }
-
-
 
 function search() {
     // Display the prompt and wait for the user to enter a barcode
