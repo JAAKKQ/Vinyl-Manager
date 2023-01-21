@@ -405,8 +405,8 @@ function prosess(info, cb) {
 async function addSongsToData() {
     const data = JSON.parse(fs.readFileSync(config.path));
     const modifiedData = data.map(async (release) => {
-        const releaseId = release.result.master_id;
-        const releaseUrl = `https://api.discogs.com/masters/${releaseId}?token=${config.token}`;
+        const releaseId = release.result.id;
+        const releaseUrl = `https://api.discogs.com/releases/${releaseId}?token=${config.token}`;
         const releaseResponse = await rateLimitedFetch(releaseUrl);
         const releaseData = await releaseResponse.json();
         console.log("Prosessing: " + release.result.title);
