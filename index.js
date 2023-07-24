@@ -433,7 +433,7 @@ async function downloadImages() {
             lastRequestTime += 1.1;
             await new Promise((resolve) => setTimeout(resolve, lastRequestTime * 1000));
             const response = await axios.get(record.result.cover_image, { responseType: 'arraybuffer' });
-            const fileName = record.result.cover_image;
+            const fileName = record.result.cover_image.substring(record.result.cover_image.lastIndexOf("/") + 1).replace(/[^\w.-]/g, '_');
             const filePath = config.path.replace("records.json", "") + "assets/record_images/" + fileName;
             await fs.promises.writeFile(filePath, Buffer.from(response.data));
             console.log(`Image downloaded successfully: ${fileName}`);
