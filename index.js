@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import { createInterface } from 'readline';
-import fs, { read } from 'fs';
+import fs from 'fs';
+import axios from 'axios';
 
 const config = JSON.parse(fs.readFileSync('config.json'));
 
@@ -67,6 +68,8 @@ function search() {
             });
         } else if (name.includes("/update")) {
             addSongsToData();
+        } else if (name.includes("/cache")) {
+            downloadImages();
         } else if (name == "") {
             readline.prompt();
         } else {
@@ -421,6 +424,23 @@ async function addSongsToData() {
         if (err) throw err;
         console.log("Updated file successfuly!")
     })
+}
+
+async function downloadImages() {
+    const data = JSON.parse(fs.readFileSync(config.path));
+    for (const record of data) {
+        try {
+            lastRequestTime += 1.1;
+            await new Promise((resolve) => setTimeout(resolve, lastRequestTime * 1000));
+            const response = await axios.get(record.result.cover_image, { responseType: 'arraybuffer' });
+            const fileName = record.result.cover_image.substring(record.result.cover_image.lastIndexOf("/") + 1, record.result.cover_image.length);
+            const filePath = config.path.replace("records.json", "") + "assets/record_images/" + fileName;
+            await fs.promises.writeFile(filePath, Buffer.from(response.data));
+            console.log(`Image downloaded successfully: ${fileName}`);
+        } catch (error) {
+            console.error('Error downloading image:', error.message);
+        }
+    }
 }
 
 search();
