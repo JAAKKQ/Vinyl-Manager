@@ -6,3 +6,6 @@ Old version of the site can be found here: https://r3ne.net/records/old/
 Current version here https://r3ne.net/records/
 
 Created a new site since I use it mostly on mobile and the old one was not so responsive on mobile.
+
+Some images may not load on first page load since there can be many records and Discogs servers are rate limiting.
+Once the images are saved on user's browser cache the page will work great.
