@@ -2,8 +2,8 @@ Created this because I wanted keep track of my records. Also when buying new rec
 
 If I want to listen to a certain song I can just write it's name on the search and then easily find it from my by genre organized shelf of albums.
 
-Old version of the site can be found here: https://r3ne.net/records/old/
-Current version here https://r3ne.net/records/
+Old version of the site can be found here: https://karkkainen.net/records/old/
+Current version here https://karkkainen.net/records/
 
 Created a new site since I use it mostly on mobile and the old one was not so responsive on mobile.
 
